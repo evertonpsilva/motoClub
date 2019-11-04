@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:motoclub/controller/loginRegister/register.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
+import 'package:page_transition/page_transition.dart';
 
 class Login extends StatelessWidget {
   @override
@@ -194,7 +195,9 @@ class Login extends StatelessWidget {
                   children: <Widget>[
                     Text("Não possui uma conta? "),
                     GestureDetector(
-                      onTap: (){},
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
+                      },
                       child: Text("Registrar-se agora!", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),),
                     )
                   ],
