@@ -66,7 +66,7 @@ class Login extends StatelessWidget {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(30))
                           ),
-                          prefixIcon: Icon(Icons.person_outline, color: Colors.black,),
+                          prefixIcon: Icon(Icons.mail_outline,color: Colors.black,),
                           contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
                         ),
                       ),
@@ -116,7 +116,9 @@ class Login extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: GradientButton(
-                        onPressed: (){},
+                        onPressed: (){
+                           Navigator.of(context).pushReplacementNamed('/home');
+                        },
                         child: Text("ENTRAR",style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),),
                         gradient: LinearGradient(
                           colors: [
