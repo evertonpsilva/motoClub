@@ -49,57 +49,73 @@ class _HomeState extends State<Home> {
         title: Text("Moto Club", style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
       ),
       body: Container(
-        padding: EdgeInsets.only(top: 30),
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: <Widget>[
-            Container(
-              height: 320,
-              child: PageView.builder(
-                onPageChanged: (int index){
-                  setState(() {
-                    currentPage = index;
-                  });
-                },
-                controller: categoryCon,
-                itemCount: 3,
-                itemBuilder: (context, index){
-                  return SizedBox(
-                    height: 300,
-                    child: Stack(
-                      children: <Widget>[
-                        AnimatedContainer(
-                          alignment: Alignment.center,
-                          height: currentPage == index ? 300 : 260,
-                          duration: Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            image: DecorationImage(image: NetworkImage(imgs[index]),fit: BoxFit.cover),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          margin: currentPage == index ? EdgeInsets.only(top: 0, left: 10, right: 10) : EdgeInsets.only(top: 20, left: 10, right: 10),
-                        ),
-                        AnimatedPositioned(
-                          duration: Duration(milliseconds: 200),
-                          bottom: currentPage == index ? -5 : 15,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            alignment: Alignment.center,
-                            width: 100,
-                            child: RaisedButton(
-                              color: Colors.black,
-                              elevation: 1,
-                              onPressed: (){},
-                              child: Text(categories[index],style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600, fontFamily: "Arvo"),),
-                            ),
-                          )
-                        ),
-                      ],
+
+            Stack(
+              children: <Widget>[
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15))
                     ),
-                  );
-                },
-              ),
-            )
+                  ),
+                ),
+                Container(
+                  height: 320,
+                  child: PageView.builder(
+                    onPageChanged: (int index){
+                      setState(() {
+                        currentPage = index;
+                      });
+                    },
+                    controller: categoryCon,
+                    itemCount: 3,
+                    itemBuilder: (context, index){
+                      return SizedBox(
+                        height: 300,
+                        child: Stack(
+                          children: <Widget>[
+                            AnimatedContainer(
+                              alignment: Alignment.center,
+                              height: currentPage == index ? 300 : 260,
+                              duration: Duration(milliseconds: 200),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(image: NetworkImage(imgs[index]),fit: BoxFit.cover),
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              margin: currentPage == index ? EdgeInsets.only(top: 0, left: 10, right: 10) : EdgeInsets.only(top: 20, left: 10, right: 10),
+                            ),
+                            AnimatedPositioned(
+                              duration: Duration(milliseconds: 200),
+                              bottom: currentPage == index ? -5 : 15,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: 100,
+                                child: RaisedButton(
+                                  color: Colors.black,
+                                  elevation: 1,
+                                  onPressed: (){},
+                                  child: Text(categories[index],style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600, fontFamily: "Arvo"),),
+                                ),
+                              )
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
