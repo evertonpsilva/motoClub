@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:motoclub/controller/loginRegister/login.dart';
 
 class Register extends StatelessWidget {

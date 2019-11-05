@@ -1,12 +1,44 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:motoclub/controller/loginRegister/register.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:localstorage/localstorage.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
+  @override
+  _LoginState createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final LocalStorage storage = new LocalStorage('firebase');
+  bool logado = false;
+  static FacebookLogin fbLogin = new FacebookLogin();
+  Future<FirebaseUser> _loginWithFacebook() async{
+    fbLogin.logIn(['email','public_profile'])
+    .then((result) async{
+      switch(result.status){
+        case FacebookLoginStatus.loggedIn:
+          FacebookAccessToken token = result.accessToken;
+          AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token.token);
+          FirebaseUser  user = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
+          print("Logado com:" + user.displayName);
+          storage.setItem("firebaseUser", user);
+          return user;
+        break;
+        default:
+        break;
+      }
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
+ 
     return Scaffold(
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -155,7 +187,12 @@ class Login extends StatelessWidget {
                           Text("Facebook",style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),)
                         ],
                       ),
-                      onPressed: (){},
+                      onPressed:()async{
+                        await _loginWithFacebook().then((user){
+                          
+                          Navigator.of(context).pushReplacementNamed("/home",);
+                        });
+                      },
                       color: Color(0xFF385c8e),
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                       shape: RoundedRectangleBorder(

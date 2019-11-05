@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:localstorage/localstorage.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -6,10 +8,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final LocalStorage storage = new LocalStorage('firebase');
 
+  FirebaseUser user;
   int currentPage = 0;
 
   PageController categoryCon;
+
 
   var colors = <Color>[
     Colors.black,
@@ -32,6 +37,7 @@ class _HomeState extends State<Home> {
   @override
   void initState(){
     super.initState();
+    user = storage.getItem('dadosApiHome');
     categoryCon = PageController(
       initialPage: 0,
       keepPage: false,
@@ -46,13 +52,22 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: true,
-        title: Text("Moto Club", style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
+        title: Text("Moto Club" + user.displayName, style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: ()async{
+              await FirebaseAuth.instance.signOut();
+              return Navigator.of(context).pushReplacementNamed('/login');
+            },
+          ),
+        ],
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: <Widget>[
-
+            
             Stack(
               children: <Widget>[
                 Positioned(
@@ -115,6 +130,12 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ],
+            ),
+            RaisedButton(
+              child: Text("pr"),
+              onPressed: (){
+                print(user.displayName);
+              },
             ),
           ],
         ),

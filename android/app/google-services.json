@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "73835922266",
+    "firebase_url": "https://motoclub-1518d.firebaseio.com",
+    "project_id": "motoclub-1518d",
+    "storage_bucket": "motoclub-1518d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73835922266:android:83a720e756798bedf1a963",
+        "android_client_info": {
+          "package_name": "com.example.motoclub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "73835922266-88h0dv3vppdeip7p3do44tjh9alq3bc5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSoyyzQw2WxAkYe-04vOGXBuCJff4GXpE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "73835922266-88h0dv3vppdeip7p3do44tjh9alq3bc5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
