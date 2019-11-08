@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:preload_page_view/preload_page_view.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -8,12 +10,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final LocalStorage storage = new LocalStorage('firebase');
 
   FirebaseUser user;
   int currentPage = 0;
 
-  PageController categoryCon;
+  PreloadPageController categoryCon;
 
 
   var colors = <Color>[
@@ -22,37 +23,50 @@ class _HomeState extends State<Home> {
     Colors.blue,
   ];
 
-  var imgs = [
-    "https://newspalteodesk.tk/photo/419935.jpg",
-    "https://www.iamabiker.com/wp-content/uploads/2018/12/Triumph-Speed-Twin-1200-phone-wallpaper.jpg",
-    "https://picserio.com/data/out/428/motorcycle-phone-wallpaper_6313493.jpg",
-  ];
-
   var categories = [
     "Sport",
     "Bonneville",
     "Custom"
   ];
 
+  bool loadingImage = true;
+  var imgs;
+
   @override
   void initState(){
     super.initState();
-    user = storage.getItem('dadosApiHome');
-    categoryCon = PageController(
+    imgs = [
+      Image.asset("images/home/sports.jpg"),
+      Image.asset("images/home/harley.jpg"),
+      Image.asset("images/home/trail.jpg"),
+    ];
+    categoryCon = PreloadPageController(
       initialPage: 0,
-      keepPage: false,
-      viewportFraction: 0.85,
+      keepPage: true,
+      viewportFraction: 1
     );
 
+    Future.delayed(Duration(milliseconds: 800), (){
+      setState(() {
+        loadingImage = false;
+      });
+    });
   }
-  
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(imgs[0].image, context);
+    precacheImage(imgs[1].image, context);
+    precacheImage(imgs[2].image, context);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: true,
-        title: Text("Moto Club" + user.displayName, style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
+        title: Text("Moto Club", style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.exit_to_app),
@@ -67,7 +81,6 @@ class _HomeState extends State<Home> {
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: <Widget>[
-            
             Stack(
               children: <Widget>[
                 Positioned(
@@ -83,8 +96,10 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 Container(
-                  height: 320,
-                  child: PageView.builder(
+                  height: 300,
+                  child: PreloadPageView.builder(
+                    preloadPagesCount: 3,
+                    physics: AlwaysScrollableScrollPhysics(),
                     onPageChanged: (int index){
                       setState(() {
                         currentPage = index;
@@ -93,7 +108,18 @@ class _HomeState extends State<Home> {
                     controller: categoryCon,
                     itemCount: 3,
                     itemBuilder: (context, index){
-                      return SizedBox(
+                      return loadingImage ? Center(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(70),
+                              color: Colors.white,
+                            ),
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                            ),
+                          ),
+                        ) : SizedBox(
                         height: 300,
                         child: Stack(
                           children: <Widget>[
@@ -101,33 +127,32 @@ class _HomeState extends State<Home> {
                               alignment: Alignment.center,
                               height: currentPage == index ? 300 : 260,
                               duration: Duration(milliseconds: 200),
-                              decoration: BoxDecoration(
-                                image: DecorationImage(image: NetworkImage(imgs[index]),fit: BoxFit.cover),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              margin: currentPage == index ? EdgeInsets.only(top: 0, left: 10, right: 10) : EdgeInsets.only(top: 20, left: 10, right: 10),
-                            ),
-                            AnimatedPositioned(
-                              duration: Duration(milliseconds: 200),
-                              bottom: currentPage == index ? -5 : 15,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                alignment: Alignment.center,
-                                width: 100,
-                                child: RaisedButton(
-                                  color: Colors.black,
-                                  elevation: 1,
-                                  onPressed: (){},
-                                  child: Text(categories[index],style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600, fontFamily: "Arvo"),),
-                                ),
-                              )
+                              child: imgs[index],
+                              margin: currentPage == index ? EdgeInsets.only(top: 0) : EdgeInsets.only(top: 40),
                             ),
                           ],
                         ),
                       );
                     },
                   ),
+                ),
+                Positioned(
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: DotsIndicator(
+                      dotsCount: imgs.length,
+                      position: currentPage.toDouble(),
+                      decorator: DotsDecorator(
+                        color: Colors.grey[700],
+                        activeColor: Colors.red,
+                        size: const Size.square(9.0),
+                        activeSize: const Size(14.0, 14.0),
+                        activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                      ),
+                    ),
+                  )
                 ),
               ],
             ),

@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:motoclub/controller/loginRegister/register.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:localstorage/localstorage.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -12,7 +11,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final LocalStorage storage = new LocalStorage('firebase');
   bool logado = false;
   static FacebookLogin fbLogin = new FacebookLogin();
   Future<FirebaseUser> _loginWithFacebook() async{
@@ -24,7 +22,6 @@ class _LoginState extends State<Login> {
           AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: token.token);
           FirebaseUser  user = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
           print("Logado com:" + user.displayName);
-          storage.setItem("firebaseUser", user);
           return user;
         break;
         default:
