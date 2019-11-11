@@ -49,6 +49,7 @@ flutter:
   assets:
    - images/logo.png
    - images/home/
+   - images/motorcycles/
 
   fonts:
      - family: OpenSans

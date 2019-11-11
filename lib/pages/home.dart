@@ -3,6 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:motoclub/pages/motoPage.dart';
+
+
+class ModelMoto{
+  String name;
+  String brand;
+  double price;
+  String thumb;
+
+  ModelMoto({this.name, this.brand, this.price, this.thumb});
+}
 
 class Home extends StatefulWidget {
   @override
@@ -16,21 +27,60 @@ class _HomeState extends State<Home> {
 
   PreloadPageController categoryCon;
 
-
-  var colors = <Color>[
-    Colors.black,
-    Colors.red,
-    Colors.blue,
+  List<ModelMoto> motorcycles = <ModelMoto>[
+    ModelMoto(name: "Africa twin sports",brand: "Honda", price: 64.990, thumb: "images/motorcycles/Africa_twin_sports_branca_bagageiro.png"),
+    ModelMoto(name: "CB 650F",brand: "Honda", price: 37.915, thumb: "images/motorcycles/cb650F_cor_vermelha_2.png"),
+    ModelMoto(name: "CBR 1000RR",brand: "Honda", price: 64.990, thumb: "images/motorcycles/cbr1000rr_sp_0.png"),
+    ModelMoto(name: "CRF 450R",brand: "Honda", price: 64.990, thumb: "images/motorcycles/cores_CRF450R_0.png"),
+    ModelMoto(name: "CB 1000R",brand: "Honda", price: 64.990, thumb: "images/motorcycles/CORES_VERMELHA_CB1000R_860x550_.png"),
+    ModelMoto(name: "Gold Wing",brand: "Honda", price: 64.990, thumb: "images/motorcycles/gold_wing_tour_redblack.png"),
+    ModelMoto(name: "CB 500F",brand: "Honda", price: 64.990, thumb: "images/motorcycles/Honda_Cb_500F-_Laranja_3.png"),
+    ModelMoto(name: "NC 750x",brand: "Honda", price: 64.990, thumb: "images/motorcycles/nc750x-azul1.png"),
+    ModelMoto(name: "Fazer 250",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/fazer-250-abs-thumb.png"),
+    ModelMoto(name: "MT 03",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/mt-03-abs-thumb.png"),
+    ModelMoto(name: "MT 07",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/mt-07-thumb.png"),
+    ModelMoto(name: "MT 09",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/mt-09-thumb.png"),
+    ModelMoto(name: "R3 ABS",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/r3-abs-thumb.png"),
+    ModelMoto(name: "Super Tenere 1200 DX",brand: "Yamaha", price: 64.990, thumb: "images/motorcycles/super-tenere-1200-dx-thumb.png"),
   ];
 
-  var categories = [
-    "Sport",
-    "Bonneville",
-    "Custom"
-  ];
+  int countItens;
+  static List<ModelMoto> motorcyclesDuplicate = <ModelMoto>[];
+  int times = 0;
 
-  bool loadingImage = true;
-  var imgs;
+  _buildBrands(){
+
+    var _brands = ["All"];
+
+    for (var i = 0; i < motorcyclesDuplicate.length; i++) {
+      if(_brands.contains(motorcyclesDuplicate[i].brand) == false){
+        _brands.add(motorcyclesDuplicate[i].brand);
+      }
+    }
+
+    final _brandListWidget = Center(
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _brands.length,
+        itemBuilder: (context, index){
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: RaisedButton(
+              color: Colors.black,
+              child: Text(_brands[index], style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontFamily: "Arvo"),),
+              onPressed: (){
+                times++;
+                setState(() {
+                  _buildMotoItems(_brands[index]);
+                });
+              },
+            ),
+          );
+        },
+      ),
+    );
+    return _brandListWidget;
+  }
 
   @override
   void initState(){
@@ -40,6 +90,7 @@ class _HomeState extends State<Home> {
       Image.asset("images/home/harley.jpg"),
       Image.asset("images/home/trail.jpg"),
     ];
+
     categoryCon = PreloadPageController(
       initialPage: 0,
       keepPage: true,
@@ -51,6 +102,8 @@ class _HomeState extends State<Home> {
         loadingImage = false;
       });
     });
+
+    motorcyclesDuplicate.addAll(motorcycles);
   }
 
   @override
@@ -60,11 +113,32 @@ class _HomeState extends State<Home> {
     precacheImage(imgs[1].image, context);
     precacheImage(imgs[2].image, context);
   }
+
+  _buildMotoItems(String brand){
+    if(brand == "All"){
+      motorcycles.clear();
+      motorcycles.addAll(motorcyclesDuplicate);
+    }else{
+      motorcycles.clear();
+      for(int i = 0; i < motorcyclesDuplicate.length; i++){
+        if(motorcyclesDuplicate[i].brand == brand){
+          setState(() {
+            motorcycles.add(motorcyclesDuplicate[i]);
+          });
+        }
+      }
+    }
+  }
+
+  bool loadingImage = true;
+  var imgs;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF292929),
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFF292929),
         centerTitle: true,
         title: Text("Moto Club", style: TextStyle(fontFamily: "Arvo", fontWeight: FontWeight.w700),),
         actions: <Widget>[
@@ -77,92 +151,139 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: <Widget>[
-            Stack(
-              children: <Widget>[
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 160,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15))
+      body: SingleChildScrollView(
+        child: Container(
+          color: Color(0xFF292929),
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  Container(
+                    height: 270,
+                    width: MediaQuery.of(context).size.width,
+                    child: PreloadPageView.builder(
+                      preloadPagesCount: 3,
+                      physics: AlwaysScrollableScrollPhysics(),
+                      onPageChanged: (int index){
+                        setState(() {
+                          currentPage = index;
+                        });
+                      },
+                      controller: categoryCon,
+                      itemCount: 3,
+                      itemBuilder: (context, index){
+                        return loadingImage ? Center(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(70),
+                                color: Colors.white,
+                              ),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                              ),
+                            ),
+                          ) : SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          height: 300,
+                          child: AnimatedContainer(
+                            width: MediaQuery.of(context).size.width,
+                            height: currentPage == index ? 300 : 260,
+                            duration: Duration(milliseconds: 200),
+                            child: imgs[index],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-                Container(
-                  height: 300,
-                  child: PreloadPageView.builder(
-                    preloadPagesCount: 3,
-                    physics: AlwaysScrollableScrollPhysics(),
-                    onPageChanged: (int index){
-                      setState(() {
-                        currentPage = index;
-                      });
-                    },
-                    controller: categoryCon,
-                    itemCount: 3,
-                    itemBuilder: (context, index){
-                      return loadingImage ? Center(
+                  Positioned(
+                    bottom: 30,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: DotsIndicator(
+                        dotsCount: imgs.length,
+                        position: currentPage.toDouble(),
+                        decorator: DotsDecorator(
+                          color: Colors.grey[700],
+                          activeColor: Colors.red,
+                          size: const Size.square(9.0),
+                          activeSize: const Size(14.0, 14.0),
+                          activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+                        ),
+                      ),
+                    )
+                  ),
+                ],
+              ),
+              Column(
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.fromLTRB(0, 17, 0, 17),
+                    width: MediaQuery.of(context).size.width,
+                    child: _buildBrands(),
+                    height: 75,
+                  ),
+                  Container(
+                    height: 200,
+                    child: ListView.builder(
+                      controller: ScrollController(initialScrollOffset: 0.6,keepScrollOffset: true,),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: motorcycles.length,
+                      itemBuilder: (context, index){
+                        return GestureDetector(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => MotoPage(name: motorcycles[index].name, thumb:motorcycles[index].thumb,)));
+                          },
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            width: MediaQuery.of(context).size.width / 2.7,
+                            margin: index == 0 ? EdgeInsets.only(left: 10, right: 10) : EdgeInsets.only(right: 10),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(70),
-                              color: Colors.white,
+                              color: Color(0xFF505050),
+                              borderRadius: BorderRadius.circular(10)
                             ),
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 5),
+                                  child: Text(
+                                    motorcycles[index].name, 
+                                    style: TextStyle(
+                                      color: Colors.white, 
+                                      fontSize: 16,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ),
+                                Container(
+                                  height: 150,
+                                  child: Hero(
+                                    tag: motorcycles[index].thumb,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage(motorcycles[index].thumb),
+                                          fit: BoxFit.fitHeight,
+                                          alignment: Alignment.centerRight
+                                        )
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ) : SizedBox(
-                        height: 300,
-                        child: Stack(
-                          children: <Widget>[
-                            AnimatedContainer(
-                              alignment: Alignment.center,
-                              height: currentPage == index ? 300 : 260,
-                              duration: Duration(milliseconds: 200),
-                              child: imgs[index],
-                              margin: currentPage == index ? EdgeInsets.only(top: 0) : EdgeInsets.only(top: 40),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  bottom: 30,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: DotsIndicator(
-                      dotsCount: imgs.length,
-                      position: currentPage.toDouble(),
-                      decorator: DotsDecorator(
-                        color: Colors.grey[700],
-                        activeColor: Colors.red,
-                        size: const Size.square(9.0),
-                        activeSize: const Size(14.0, 14.0),
-                        activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                      ),
+                        );
+                      },
                     ),
-                  )
-                ),
-              ],
-            ),
-            RaisedButton(
-              child: Text("pr"),
-              onPressed: (){
-                print(user.displayName);
-              },
-            ),
-          ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
