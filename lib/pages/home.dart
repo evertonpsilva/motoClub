@@ -4,6 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:motoclub/pages/motoPage.dart';
+import 'package:motoclub/pages/addItem.dart';
+import 'package:speedometer/speedometer.dart';
+import 'package:rxdart/rxdart.dart';
 
 
 class ModelMoto{
@@ -151,6 +154,43 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(FontAwesomeIcons.plus),
+        backgroundColor: Color(0xFF505050),
+        elevation: 4.0,
+        onPressed: (){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddItem()));
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.white,
+        backgroundColor: Colors.black,
+        unselectedItemColor: Colors.grey[600],
+        items: [
+          BottomNavigationBarItem(
+            title: Text("Home"),
+            icon: Icon(FontAwesomeIcons.home)
+          ),
+          BottomNavigationBarItem(
+            title: Text("Search"),
+            icon: Icon(FontAwesomeIcons.search)
+          ),
+          BottomNavigationBarItem(
+            title: Text(""),
+            icon: Icon(Icons.add),
+          ),
+          BottomNavigationBarItem(
+            title: Text("My List"),
+            icon: Icon(FontAwesomeIcons.heart)
+          ),
+          BottomNavigationBarItem(
+            title: Text("Profile"),
+            icon: Icon(FontAwesomeIcons.userCircle)
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Container(
           color: Color(0xFF292929),
@@ -217,70 +257,66 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
-              Column(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.fromLTRB(0, 17, 0, 17),
-                    width: MediaQuery.of(context).size.width,
-                    child: _buildBrands(),
-                    height: 75,
-                  ),
-                  Container(
-                    height: 200,
-                    child: ListView.builder(
-                      controller: ScrollController(initialScrollOffset: 0.6,keepScrollOffset: true,),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: motorcycles.length,
-                      itemBuilder: (context, index){
-                        return GestureDetector(
-                          onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => MotoPage(name: motorcycles[index].name, thumb:motorcycles[index].thumb,)));
-                          },
-                          child: Container(
-                            width: MediaQuery.of(context).size.width / 2.7,
-                            margin: index == 0 ? EdgeInsets.only(left: 10, right: 10) : EdgeInsets.only(right: 10),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF505050),
-                              borderRadius: BorderRadius.circular(10)
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 5),
-                                  child: Text(
-                                    motorcycles[index].name, 
-                                    style: TextStyle(
-                                      color: Colors.white, 
-                                      fontSize: 16,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ),
-                                Container(
-                                  height: 150,
-                                  child: Hero(
-                                    tag: motorcycles[index].thumb,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(motorcycles[index].thumb),
-                                          fit: BoxFit.fitHeight,
-                                          alignment: Alignment.centerRight
-                                        )
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
+              Container(
+                padding: EdgeInsets.fromLTRB(0, 17, 0, 17),
+                width: MediaQuery.of(context).size.width,
+                child: _buildBrands(),
+                height: 75,
+              ),
+              Container(
+                height: 200,
+                child: ListView.builder(
+                  controller: ScrollController(initialScrollOffset: 0.6,keepScrollOffset: true,),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: motorcycles.length,
+                  itemBuilder: (context, index){
+                    return GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MotoPage(name: motorcycles[index].name, thumb:motorcycles[index].thumb,)));
                       },
-                    ),
-                  ),
-                ],
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2.7,
+                        margin: index == 0 ? EdgeInsets.only(left: 10, right: 10) : EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF505050),
+                          borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(10, 10, 10, 5),
+                              child: Text(
+                                motorcycles[index].name, 
+                                style: TextStyle(
+                                  color: Colors.white, 
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.start,
+                              ),
+                            ),
+                            Container(
+                              height: 150,
+                              child: Hero(
+                                tag: motorcycles[index].thumb,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: AssetImage(motorcycles[index].thumb),
+                                      fit: BoxFit.fitHeight,
+                                      alignment: Alignment.centerRight
+                                    )
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
