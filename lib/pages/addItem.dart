@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,7 +36,12 @@ class _AddItemState extends State<AddItem> {
     });
   }
 
+  bool inserting = false;
+
   void _addMoto({String name, String, brand, String price, String category, String highSpeed, String color, File imgFile}) async{
+    setState(() {
+      inserting = true;
+    });
     if(imgFile == null) return;
     StorageUploadTask task = FirebaseStorage.instance.ref().
       child('MOTORCYCLEITEM' +
@@ -51,7 +57,58 @@ class _AddItemState extends State<AddItem> {
         "highSpeed" : highSpeed,
         "imgUrl" : imgUrl,
       }
-    );
+    ).catchError((erro){
+      print("Erro" + erro);
+      setState(() {
+        inserting = false;
+      });
+      return showDialog(
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            title: Text("Ops!"),
+            content: Text("Houve um erro. Tente novamente"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Fechar"),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+      );
+    }).whenComplete((){
+      print("deu bom");
+      setState(() {
+        inserting = false;
+        _nameCon.clear();
+        _brandCon.clear();
+        _priceCon.clear();
+        _categoryCon.clear();
+        _speedCon.clear();
+        currentColor = pickerColor;
+        _image = null;
+      });
+      return showDialog(
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            title: Text("Tudo certo!"),
+            content: Text("Moto Adicionada com sucesso!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Fechar"),
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+      );
+    });
   }
 
   void changeColor(Color color) {
@@ -99,6 +156,21 @@ class _AddItemState extends State<AddItem> {
 
   String prefixText = "";
 
+  FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseUser user;
+
+  _getCurrentUser() async{
+    user = await auth.currentUser();
+    print(user);
+  }
+
+  @override
+  void initState(){
+    super.initState();
+
+    _getCurrentUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +183,9 @@ class _AddItemState extends State<AddItem> {
         child: SingleChildScrollView( 
           child: Container(
             height: MediaQuery.of(context).size.height - 86,
-            child: Column(
+            child: inserting ? Center(
+              child: CircularProgressIndicator(),
+            ) : Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 _image == null ? 
@@ -193,8 +267,8 @@ class _AddItemState extends State<AddItem> {
                                 color: Color(0xFF292929),
                               )
                             ),
-                            hintText: "Moto name",
-                            hintStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
+                            labelText: "Moto name",
+                            labelStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
                           ),
                         ),
                       ),
@@ -226,8 +300,8 @@ class _AddItemState extends State<AddItem> {
                                 color: Color(0xFF292929),
                               )
                             ),
-                            hintText: "Brand",
-                            hintStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
+                            labelText: "Brand",
+                            labelStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
                           ),
                         ),
                       ),
@@ -269,8 +343,8 @@ class _AddItemState extends State<AddItem> {
                                 color: Color(0xFF292929),
                               )
                             ),
-                            hintText: "Price",
-                            hintStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
+                            labelText: "Price",
+                            labelStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
                           ),
                         ),
                       ),
@@ -303,8 +377,8 @@ class _AddItemState extends State<AddItem> {
                                 color: Color(0xFF292929),
                               )
                             ),
-                            hintText: "Category",
-                            hintStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
+                            labelText: "Category",
+                            labelStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
                           ),
                         ),
                       ),
@@ -340,8 +414,8 @@ class _AddItemState extends State<AddItem> {
                                 color: Color(0xFF292929),
                               )
                             ),
-                            hintText: "High Speed",
-                            hintStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
+                            labelText: "High Speed",
+                            labelStyle: TextStyle(color: Colors.white, fontSize: 24, fontFamily: "Arvo", fontWeight: FontWeight.w600)
                           ),
                         ),
                       ),
