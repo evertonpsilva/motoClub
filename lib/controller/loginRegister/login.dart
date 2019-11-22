@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:motoclub/controller/loginRegister/register.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
+import 'package:motoclub/widgets/inputLogin.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class Login extends StatefulWidget {
@@ -36,7 +37,8 @@ class _LoginState extends State<Login> {
   }
 
   Future<FirebaseUser> _loginWithEmailAndPass({String email, String password}) async{
-    await _auth.signInWithEmailAndPassword(
+    try {
+      await _auth.signInWithEmailAndPassword(
       email: email, password: password).then((AuthResult res){
         FirebaseUser user = res.user;
         return user.uid;
@@ -47,6 +49,9 @@ class _LoginState extends State<Login> {
         print("usuario logado");
         Navigator.pushReplacementNamed(context, "/home");
       });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   TextEditingController _emailCon = TextEditingController();
@@ -64,13 +69,15 @@ class _LoginState extends State<Login> {
       body: SingleChildScrollView(
         child: Container(
           decoration: BoxDecoration(
-            color: Color(0xFFfbfbfb),
+            color: entering ? Colors.black : Color(0xFFfbfbfb),
           ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.09,),
           height: MediaQuery.of(context).size.height,
           child: entering ? Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+            ),
           ) : Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -90,78 +97,17 @@ class _LoginState extends State<Login> {
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        controller: _emailCon,
-                        decoration: InputDecoration(
-                          hintText: "E-mail",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          prefixIcon: Icon(Icons.mail_outline,color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
+                    LoginInput(
+                      controller: _emailCon,
+                      type: TextInputType.emailAddress,
+                      label: "E-Mail",
+                      prefixIcon: Icon(Icons.mail_outline,color: Colors.black,),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        controller: _passCon,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: "Senha",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: Icon(Icons.lock_open, color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
+                    LoginInput(
+                      controller: _passCon,
+                      obscureText: true,
+                      label: "Senha",
+                      prefixIcon: Icon(Icons.lock,color: Colors.black,),
                     ),
                     Align(
                       alignment: Alignment.centerRight,

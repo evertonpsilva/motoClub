@@ -10,7 +10,7 @@ class LoginInput extends StatelessWidget {
   Function validator;
   Function onSaved;
 
-  LoginInput({this.label,this.controller, this.prefixIcon, this.obscureText, this.type, this.validator, this.onSaved});
+  LoginInput({this.label,this.controller, this.prefixIcon, this.obscureText = false, this.type, this.validator, this.onSaved});
 
   @override
   Widget build(BuildContext context) {
