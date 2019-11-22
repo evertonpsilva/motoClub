@@ -25,7 +25,19 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  FirebaseAuth _auth = FirebaseAuth.instance;
+
   FirebaseUser user;
+
+  Future<FirebaseUser> _currentUser() async{
+    
+    user = await _auth.currentUser();
+    setState(() {
+      user;
+    });
+    return user;
+  }
+
   int currentPage = 0;
 
   PreloadPageController categoryCon;
@@ -88,6 +100,12 @@ class _HomeState extends State<Home> {
   @override
   void initState(){
     super.initState();
+
+    _currentUser().then((user){
+      print(user.displayName);
+      print(user.uid);
+    });
+
     imgs = [
       Image.asset("images/home/sports.jpg"),
       Image.asset("images/home/harley.jpg"),

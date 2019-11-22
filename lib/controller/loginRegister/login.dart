@@ -11,6 +11,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+
+  FirebaseAuth _auth = FirebaseAuth.instance;
+
   bool logado = false;
   static FacebookLogin fbLogin = new FacebookLogin();
   Future<FirebaseUser> _loginWithFacebook() async{
@@ -32,6 +35,26 @@ class _LoginState extends State<Login> {
     });
   }
 
+  Future<FirebaseUser> _loginWithEmailAndPass({String email, String password}) async{
+    await _auth.signInWithEmailAndPassword(
+      email: email, password: password).then((AuthResult res){
+        FirebaseUser user = res.user;
+        return user.uid;
+      }).catchError((erro){
+        print("erro" + erro);
+      })
+      .whenComplete((){
+        print("usuario logado");
+        Navigator.pushReplacementNamed(context, "/home");
+      });
+  }
+
+  TextEditingController _emailCon = TextEditingController();
+  TextEditingController _passCon = TextEditingController();
+
+  bool entering = false;
+
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +69,9 @@ class _LoginState extends State<Login> {
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.09,),
           height: MediaQuery.of(context).size.height,
-          child: Column(
+          child: entering ? Center(
+            child: CircularProgressIndicator(),
+          ) : Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -62,6 +87,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Form(
+                key: _formKey,
                 child: Column(
                   children: <Widget>[
                     Container(
@@ -71,6 +97,7 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.all(Radius.circular(30))
                       ),
                       child: TextFormField(
+                        controller: _emailCon,
                         decoration: InputDecoration(
                           hintText: "E-mail",
                           hintStyle: TextStyle(color: Colors.black),
@@ -107,6 +134,7 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.all(Radius.circular(30))
                       ),
                       child: TextFormField(
+                        controller: _passCon,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: "Senha",
@@ -146,7 +174,30 @@ class _LoginState extends State<Login> {
                       padding: EdgeInsets.only(top: 20),
                       child: GradientButton(
                         onPressed: (){
-                           Navigator.of(context).pushReplacementNamed('/home');
+                          if(_emailCon.text == "" || _passCon.text == ""){
+                            return showDialog(
+                              context: context,
+                              builder: (context){
+                                return AlertDialog(
+                                  title: Text("Erro!"),
+                                  content: Text("Campos não podem estar vazios"),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text("Fechar"),
+                                      onPressed: (){
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                );
+                              }
+                            );
+                          }else{
+                            setState(() {
+                              entering = true;
+                            });
+                            _loginWithEmailAndPass(email: _emailCon.text, password: _passCon.text);
+                          }
                         },
                         child: Text("ENTRAR",style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),),
                         gradient: LinearGradient(

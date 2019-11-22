@@ -1,8 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
 import 'package:motoclub/controller/loginRegister/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:motoclub/widgets/inputLogin.dart';
 
-class Register extends StatelessWidget {
+
+class Register extends StatefulWidget {
+  @override
+  _RegisterState createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+
+  bool registering = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  FirebaseUser user;
+
+  Future<String> signUp(String name, String email, String password) async{
+    AuthResult result = await _auth.createUserWithEmailAndPassword(
+      email: email, password: password).catchError((erro){
+        setState(() {
+          registering = false;
+        });
+        return showDialog(
+          context: context,
+          builder: (BuildContext context){
+            print("Erro" + erro);
+            return AlertDialog(
+              title: Text("Erro!"),
+              content: Text("Ocorreu um erro"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Fechar"),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          }
+        );
+    }).then((AuthResult res){
+      setState(() {
+        registering = false;
+      });
+      
+      user = res.user;
+      return showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: Row(
+              children: <Widget>[
+                Text("Tudo certo!!!"),
+                Icon(Icons.check_circle, color: Colors.green,)
+              ],
+            ),
+            content:Text("Usuário criado com sucesso!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Fechar"),
+                onPressed: (){
+                  _nameCon.clear();
+                  _emailCon.clear();
+                  _passwordCon.clear();
+                  _confirmPasswordCon.clear();
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+      );
+    });
+
+    user.sendEmailVerification();
+    
+    _auth.currentUser().then((val){
+      UserUpdateInfo addName = UserUpdateInfo();
+      addName.displayName = name;
+      val.updateProfile(addName).whenComplete((){print("Foi");});
+    });
+
+    return user.uid;
+  }
+
+  TextEditingController _nameCon = TextEditingController();
+  TextEditingController _emailCon = TextEditingController();
+  TextEditingController _passwordCon = TextEditingController();
+  TextEditingController _confirmPasswordCon = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  String validateEmail(String value) {
+    Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = new RegExp(pattern);
+    if (!regex.hasMatch(value))
+      return 'Enter Valid Email';
+    else
+      return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +122,14 @@ class Register extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height - 85,
           padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.09,),
-          child: Column(
+          child: registering ? 
+            Center(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -37,156 +145,60 @@ class Register extends StatelessWidget {
                 ),
               ),
               Form(
+                key: _formKey,
                 child: Column(
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: "Nome",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          prefixIcon: Icon(Icons.person_outline, color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: "E-mail",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          prefixIcon: Icon(Icons.mail_outline, color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: "Senha",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: Icon(Icons.lock_open, color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: TextFormField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: "Confirmar senha",
-                          hintStyle: TextStyle(color: Colors.black),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(30))
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                          ),
-                          prefixIcon: Icon(Icons.lock_open, color: Colors.black,),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 10)
-                        ),
-                      ),
+                    LoginInput(label: "Nome",obscureText: false,controller: _nameCon,prefixIcon: Icon(Icons.person_outline, color: Colors.black,),type: TextInputType.text,),
+                    LoginInput(label: "E-Mail",obscureText: false,controller: _emailCon,prefixIcon: Icon(Icons.mail_outline, color: Colors.black),type: TextInputType.emailAddress,
+                        validator: validateEmail,),
+                    LoginInput(label: "Senha",obscureText: true,controller: _passwordCon,prefixIcon: Icon(Icons.lock, color: Colors.black),),
+                    LoginInput(
+                      label: "Confirmar senha", 
+                      obscureText: true, 
+                      controller: _confirmPasswordCon,
+                      prefixIcon: Icon(Icons.lock, color: Colors.black),
+                      validator: (value){
+                        if(value.isEmpty){
+                          return 'Campo não pode estar vazio';
+                        }else if(value != _passwordCon.text){
+                          return 'Senhas não conferem';
+                        }else{
+                          return null;
+                        }
+                      },
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: GradientButton(
-                        onPressed: (){},
+                        onPressed: (){
+                          if(_nameCon.text == "" || _emailCon.text == "" || _passwordCon.text == "" || _confirmPasswordCon.text == ""){
+                            return showDialog(
+                              context: context,
+                              builder: (BuildContext context){
+                                return AlertDialog(
+                                  title: Text("Erro"),
+                                  content: Text("Preencha todos os campos"),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text("Fechar"),
+                                      onPressed: (){
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                );
+                              }
+                            );
+                          }else{
+                            if(_formKey.currentState.validate()){
+                              setState(() {
+                                registering = true;
+                              });
+                              signUp(_nameCon.text, _emailCon.text, _passwordCon.text);
+                            }
+                          }
+                          
+                        },
                         child: Text("CRIAR",style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),),
                         gradient: LinearGradient(
                           colors: [
