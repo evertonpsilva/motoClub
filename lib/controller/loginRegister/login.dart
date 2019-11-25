@@ -2,11 +2,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:motoclub/controller/loginRegister/register.dart';
+import 'package:motoclub/controller/loginRegister/loginRegisterRoot.dart';
+import 'package:motoclub/controller/authentication.dart';
 import 'package:motoclub/widgets/gradientButton.dart';
 import 'package:motoclub/widgets/inputLogin.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class Login extends StatefulWidget {
+
+  Auth loginAuth;
+  final VoidCallback loginCallback;
+  
+  Login({this.loginAuth, this.loginCallback});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -35,31 +43,88 @@ class _LoginState extends State<Login> {
       print(e);
     });
   }
-
-  Future<FirebaseUser> _loginWithEmailAndPass({String email, String password}) async{
-    try {
-      await _auth.signInWithEmailAndPassword(
-      email: email, password: password).then((AuthResult res){
-        FirebaseUser user = res.user;
-        return user.uid;
-      }).catchError((erro){
-        print("erro" + erro);
-      })
-      .whenComplete((){
-        print("usuario logado");
-        Navigator.pushReplacementNamed(context, "/home");
-      });
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
+  
   TextEditingController _emailCon = TextEditingController();
   TextEditingController _passCon = TextEditingController();
 
+  final _formKey = GlobalKey<FormState>();
+
+  String _email;
+  String _password;
+  String _errorMessage;
+
   bool entering = false;
 
-  final _formKey = GlobalKey<FormState>();
+  bool validateAndSave(){
+    final form = _formKey.currentState;
+    if(form.validate()){
+      form.save();
+      return true;
+    }
+    return false;
+  }
+
+  void validateAndSubmit() async{
+    setState(() {
+      entering = true;
+    });
+    if(validateAndSave()){
+
+      String userId = "";
+
+      try{
+        userId = await widget.loginAuth.signIn(_email, _password);
+        print('Signed in: $userId');
+        setState(() {
+          entering = false;
+        });
+        if(userId.length > 0 && userId != null){
+          widget.loginCallback();
+        }
+
+      }catch (e){
+        setState(() {
+          entering = false;
+          _errorMessage = e.message;
+        });
+        return showDialog(
+          context: context,
+          builder: (context){
+            return AlertDialog(
+              title: Row(
+                children: <Widget>[
+                  Text("Erro"),
+                  Icon(Icons.error, color: Colors.red,)
+                ],
+              ),
+              content: Text(_errorMessage),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Entendi"),
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          }
+        );
+        print(_errorMessage);
+      }
+    }
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    _errorMessage = "";
+    entering = false;
+  }
+
+  void resetForm(){
+    _formKey.currentState.reset();
+    _errorMessage = "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,13 +163,15 @@ class _LoginState extends State<Login> {
                 child: Column(
                   children: <Widget>[
                     LoginInput(
-                      controller: _emailCon,
+                      validator: (value) => value.isEmpty ? 'Email não pode ser vazio' : null,
+                      onSaved: (value) => _email = value.trim(),
                       type: TextInputType.emailAddress,
-                      label: "E-Mail",
+                      label: "Email",
                       prefixIcon: Icon(Icons.mail_outline,color: Colors.black,),
                     ),
                     LoginInput(
-                      controller: _passCon,
+                      validator: (value) => value.isEmpty ? 'Senha não pode ser vazia' : null,
+                      onSaved: (value) => _password = value.trim(),
                       obscureText: true,
                       label: "Senha",
                       prefixIcon: Icon(Icons.lock,color: Colors.black,),
@@ -119,32 +186,7 @@ class _LoginState extends State<Login> {
                     Padding(
                       padding: EdgeInsets.only(top: 20),
                       child: GradientButton(
-                        onPressed: (){
-                          if(_emailCon.text == "" || _passCon.text == ""){
-                            return showDialog(
-                              context: context,
-                              builder: (context){
-                                return AlertDialog(
-                                  title: Text("Erro!"),
-                                  content: Text("Campos não podem estar vazios"),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text("Fechar"),
-                                      onPressed: (){
-                                        Navigator.pop(context);
-                                      },
-                                    )
-                                  ],
-                                );
-                              }
-                            );
-                          }else{
-                            setState(() {
-                              entering = true;
-                            });
-                            _loginWithEmailAndPass(email: _emailCon.text, password: _passCon.text);
-                          }
-                        },
+                        onPressed: validateAndSubmit,
                         child: Text("ENTRAR",style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),),
                         gradient: LinearGradient(
                           colors: [
@@ -229,7 +271,7 @@ class _LoginState extends State<Login> {
                     Text("Não possui uma conta? "),
                     GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Register()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage()));
                       },
                       child: Text("Registrar-se agora!", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700),),
                     )

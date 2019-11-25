@@ -21,11 +21,13 @@ dependencies:
     sdk: flutter
   font_awesome_flutter: ^8.5.0
   preload_page_view: ^0.1.4
+  page_transition: "^1.1.5"
   dots_indicator: ^1.1.0
   flutter_masked_text: ^0.8.0
   speedometer: "^1.0.1"
   cloud_firestore: ^0.11.0+2
   firebase_storage: ^3.0.0
+  flare_flutter: ^1.7.3
   image_picker: ^0.6.0+3
   flutter_colorpicker: ^0.2.6
   firebase_auth:
@@ -56,6 +58,7 @@ flutter:
    - images/logo.png
    - images/home/
    - images/motorcycles/
+   - flares/
 
   fonts:
      - family: OpenSans

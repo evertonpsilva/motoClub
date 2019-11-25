@@ -5,6 +5,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:motoclub/pages/motoPage.dart';
 import 'package:motoclub/pages/addItem.dart';
+import 'package:motoclub/controller/authentication.dart';
 import 'package:speedometer/speedometer.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -19,6 +20,14 @@ class ModelMoto{
 }
 
 class Home extends StatefulWidget {
+
+  final BaseAuth auth;
+  final VoidCallback logoutCallback;
+  final String userId;
+
+  Home({Key key, this.auth, this.userId, this.logoutCallback})
+      : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -101,10 +110,6 @@ class _HomeState extends State<Home> {
   void initState(){
     super.initState();
 
-    _currentUser().then((user){
-      print(user.displayName);
-      print(user.uid);
-    });
 
     imgs = [
       Image.asset("images/home/sports.jpg"),
